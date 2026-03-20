@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=816, initial-scale=1.0"/>
+  <title>TechQuest GenAI Prompt Challenge</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      padding: 20px 16px;
+    }
+
+    .flyer {
+      width: 816px;
+      background: #ffffff;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.14);
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(135deg, #0f2c5e 0%, #1a4fa0 60%, #0078d4 100%);
+      color: white;
+      padding: 26px 0 22px 40px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+      gap: 28px;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .header-text { position: relative; z-index: 1; flex: 1; }
+    .badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 30px;
+      padding: 4px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .header h1 {
+      font-size: 36px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .header h1 span { color: #5ec8f2; }
+    .header p.tagline {
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.5;
+    }
+    .header-graphic {
+      width: 215px;
+      flex-shrink: 0;
+      align-self: stretch;
+      overflow: hidden;
+    }
+    .header-graphic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+    .date-inline {
+      display: inline-block;
+      margin-top: 12px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 5px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #5ec8f2;
+      white-space: nowrap;
+    }
+
+    /* ── BODY ── */
+    .body { padding: 14px 34px 10px; }
+
+    /* ── TWO COLUMN LAYOUT ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 290px;
+      gap: 22px;
+      margin-bottom: 12px;
+    }
+
+    /* ── SECTION TITLES ── */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 800;
+      color: #0f2c5e;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1.5px;
+      background: linear-gradient(to right, #0078d4 0%, transparent 100%);
+      margin-left: 6px;
+      border-radius: 2px;
+    }
+
+    /* ── HOW TO WIN ── */
+    .win-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .win-card {
+      background: #f5f9ff;
+      border: 1.5px solid #d0e4f7;
+      border-radius: 8px;
+      padding: 13px 14px;
+    }
+    .win-card h4 {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #0078d4;
+      margin-bottom: 4px;
+    }
+    .win-card p {
+      font-size: 12px;
+      color: #3a3a3a;
+      line-height: 1.55;
+    }
+
+    /* ── HOW TO PARTICIPATE ── */
+    .step {
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 24px; height: 24px;
+      background: #0078d4;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .step p {
+      font-size: 13px;
+      color: #2a2a2a;
+      line-height: 1.55;
+    }
+    .step p strong { color: #0f2c5e; }
+
+    /* ── PRIZES ── */
+    .prizes-col { margin-bottom: 0; }
+    .prize-card {
+      border-radius: 8px;
+      padding: 13px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+    }
+    .prize-card.gold  { background: linear-gradient(135deg, #5a3500, #9a6000); }
+    .prize-card.silver{ background: linear-gradient(135deg, #1a1a2e, #2e4080); }
+    .prize-card.bonus { background: linear-gradient(135deg, #0a3d1f, #0f6d38); }
+    .prize-card .medal { font-size: 26px; flex-shrink: 0; }
+    .prize-card-text h3 { font-size: 14px; font-weight: 800; }
+    .prize-card-text p  { font-size: 12px; opacity: 0.85; line-height: 1.4; }
+    .prize-amount {
+      margin-left: auto;
+      background: rgba(255,255,255,0.2);
+      border-radius: 30px;
+      padding: 4px 12px;
+      font-size: 17px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    /* ── FORMULA ── */
+    .formula-box {
+      background: linear-gradient(135deg, #0f2c5e, #1a4fa0);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: white;
+      margin-bottom: 16px;
+    }
+    .formula-box h3 {
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #5ec8f2;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+    }
+    .template-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px 28px;
+    }
+    .gcof-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px;
+      margin-bottom: 8px;
+    }
+    .gcof-item {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      padding: 9px 4px;
+      text-align: center;
+    }
+    .gcof-item .letter {
+      font-size: 22px;
+      font-weight: 900;
+      color: #5ec8f2;
+      line-height: 1;
+    }
+    .gcof-item .label {
+      font-size: 9.5px;
+      font-weight: 700;
+      margin-top: 3px;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .gcof-item .desc {
+      font-size: 9px;
+      opacity: 0.7;
+      line-height: 1.3;
+    }
+    .template-box {
+      background: rgba(0,0,0,0.25);
+      border-radius: 6px;
+      padding: 10px 13px;
+      font-size: 11px;
+      line-height: 1.75;
+    }
+    .template-box span { color: #5ec8f2; font-weight: 700; }
+
+    /* ── EXAMPLE PROMPTS ── */
+    .prompts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .prompt-card {
+      border-left: 3px solid #0078d4;
+      background: #f5f9ff;
+      border-radius: 0 8px 8px 0;
+      padding: 13px 14px;
+    }
+    .prompt-card .prompt-label {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #0078d4;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 5px;
+    }
+    .prompt-card blockquote {
+      font-size: 12px;
+      color: #2a2a2a;
+      line-height: 1.55;
+      font-style: italic;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: #f5f9ff;
+      border-top: 1.5px solid #d0e4f7;
+      padding: 14px 34px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .team-contacts h4 {
+      font-size: 11px;
+      font-weight: 700;
+      color: #0f2c5e;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .contacts-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .contact-chip {
+      background: white;
+      border: 1.5px solid #c0d8f0;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f2c5e;
+    }
+    .res-links a {
+      display: inline;
+      font-size: 12px;
+      color: #0078d4;
+      text-decoration: none;
+      font-weight: 600;
+      margin-right: 10px;
+    }
+    .res-links a:hover { text-decoration: underline; }
+
+    @media print {
+      @page { size: Letter; margin: 0; }
+      body { background: white; padding: 0; margin: 0; }
+      .flyer { box-shadow: none; border-radius: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="flyer">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-text">
+        <div class="badge">🏆 D&amp;SS TechQuest Challenge</div>
+        <h1>GenAI <span>Prompt</span> Challenge is HERE!</h1>
+        <p class="tagline">Level up your Copilot skills &amp; help the team work smarter. Share your best prompts and compete for top honors!</p>
+        <p class="date-inline">🗓️ &nbsp;April 6 → April 24, 2026</p>
+      </div>
+      <div class="header-graphic">
+        <img src="ExcelConverter.png" alt="graphic" />
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="body">
+
+      <div class="two-col">
+
+        <!-- LEFT COLUMN -->
+        <div>
+          <!-- HOW TO WIN -->
+          <div class="section-title">🏆 How to Win</div>
+          <div class="win-grid">
+            <div class="win-card">
+              <h4>📝 Post Your Best Prompt</h4>
+              <p>Share your best GenAI / Copilot prompt(s) in the D&amp;SS TechQuest Channel during the contest window.</p>
+            </div>
+            <div class="win-card">
+              <h4>💡 Make it Useful</h4>
+              <p><strong>Useful, clever, innovative</strong> — prompts others can try immediately. Include the goal and output you got.</p>
+            </div>
+            <div class="win-card">
+              <h4>❤️ Reactions Count</h4>
+              <p>Prompts with the most <strong>emoji reactions</strong> have a chance at 1st and 2nd place prizes.</p>
+            </div>
+            <div class="win-card">
+              <h4>💬 Comments Count Too</h4>
+              <p>Most <strong>engagement</strong> rises to the top. React and reply to others' prompts!</p>
+            </div>
+          </div>
+
+          <!-- HOW TO PARTICIPATE -->
+          <div class="section-title">✅ How to Participate</div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">1</div>
+              <p>Watch for the <strong>challenge thread</strong> in this Teams channel launching April 6.</p>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <p><strong>Create a new post</strong> in the D&amp;SS TechQuest Channel and share your prompt (copy/paste).</p>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <p>Include: <strong>What it's for</strong> (1 sentence) · <strong>The prompt</strong> · Any helpful context (optional).</p>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <p><strong>React + comment</strong> on others' prompts to boost learning and engagement scores!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div>
+          <!-- PRIZES -->
+          <div class="section-title">🎁 Prizes</div>
+          <div class="prizes-col">
+            <div class="prize-card gold">
+              <div class="medal">🥇</div>
+              <div class="prize-card-text"><h3>1st Place</h3><p>Top prompt by engagement</p></div>
+              <div class="prize-amount">$50</div>
+            </div>
+            <div class="prize-card silver">
+              <div class="medal">🥈</div>
+              <div class="prize-card-text"><h3>2nd Place</h3><p>Runner-up award</p></div>
+              <div class="prize-amount">$50</div>
+            </div>
+            <div class="prize-card bonus">
+              <div class="medal">📚</div>
+              <div class="prize-card-text"><h3>Bonus: Top 10</h3><p>Featured in the D&amp;SS TechQuest Prompt Library!</p></div>
+            </div>
+          </div>
+
+          <!-- GCOF removed -->
+        </div>
+
+      </div><!-- /two-col -->
+
+      <!-- EXAMPLE PROMPTS -->
+      <div class="section-title">🔥 Example Prompts You Can Steal &amp; Remix</div>
+      <div class="prompts-grid">
+        <div class="prompt-card">
+          <div class="prompt-label">Create a quick plan</div>
+          <blockquote>"Create a 2-week execution plan for [goal]. Include milestones, dependencies, and a communications cadence. Output as a table."</blockquote>
+        </div>
+        <div class="prompt-card">
+          <div class="prompt-label">Compare options</div>
+          <blockquote>"Compare Option A vs Option B for [scenario]. Provide pros/cons, risks, and a recommendation. Output in a table."</blockquote>
+        </div>
+        <div class="prompt-card">
+          <div class="prompt-label">Make it reusable</div>
+          <blockquote>"Turn this into a reusable template my team can use each time we do [process]. Include placeholders and instructions."</blockquote>
+        </div>
+      </div>
+
+    </div><!-- /body -->
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="team-contacts">
+        <h4>📬 Questions? Reach out to the TechQuest Team</h4>
+        <div class="contacts-list">
+          <span class="contact-chip">Cerrone Mitchell</span>
+          <span class="contact-chip">Eduardo Tovar</span>
+          <span class="contact-chip">Grace Landry</span>
+          <span class="contact-chip">Tanya Muswera</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /flyer -->
+</body>
+</html>

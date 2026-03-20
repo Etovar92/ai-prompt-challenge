@@ -1,0 +1,1860 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🏆 TechQuest GenAI Prompt Challenge</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #f0f4f8;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      background: linear-gradient(135deg, #0f2c5e 0%, #1a4fa0 60%, #0078d4 100%);
+      color: white;
+      padding: 32px 24px 28px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .site-header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 260px; height: 260px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+      pointer-events: none;
+    }
+    .header-robot {
+      position: absolute;
+      bottom: -10px;
+      right: 24px;
+      height: 170px;
+      width: auto;
+      pointer-events: none;
+      user-select: none;
+      filter: drop-shadow(0 8px 24px rgba(0,0,0,0.35));
+      z-index: 2;
+    }
+    @media (max-width: 600px) {
+      .header-robot { height: 110px; right: 8px; }
+    }
+    .header-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .site-header h1 {
+      font-size: clamp(26px, 5vw, 42px);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .site-header h1 span { color: #5ec8f2; }
+    .site-header .subtitle {
+      font-size: 15px;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .dates-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 30px;
+      padding: 8px 22px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #5ec8f2;
+      position: relative;
+      z-index: 1;
+    }
+    .refresh-note {
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── LAYOUT ── */
+    .main-wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 780px) {
+      .main-wrap { grid-template-columns: 1fr; }
+    }
+
+    /* ── PANEL ── */
+    .panel {
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+    .panel + .panel { margin-top: 20px; }
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1.5px solid #e8f0fb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-header h2 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f2c5e;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+    .count-badge {
+      background: #e8f0fb;
+      color: #0078d4;
+      border-radius: 20px;
+      padding: 3px 11px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* ── SUBMIT FORM ── */
+    .submit-form { padding: 20px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #0f2c5e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      border: 1.5px solid #d0e4f7;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      font-family: inherit;
+      color: #1a1a2e;
+      background: #f8fbff;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #0078d4;
+      background: white;
+    }
+    .form-group textarea { resize: vertical; min-height: 110px; }
+    .form-group .hint { font-size: 11px; color: #999; margin-top: 4px; }
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #0078d4, #1a4fa0);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── LEADERBOARD ── */
+    .leaderboard-body { padding: 12px; }
+    .empty-state {
+      text-align: center;
+      padding: 52px 24px;
+      color: #aaa;
+    }
+    .empty-state .ei { font-size: 52px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* ── PROMPT CARD ── */
+    .prompt-card {
+      border: 1.5px solid #e8f0fb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 10px;
+      background: white;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .prompt-card:hover { box-shadow: 0 4px 18px rgba(0,120,212,0.1); border-color: #c0d8f0; }
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .rank-medal { font-size: 26px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+    .rank-num {
+      width: 34px; height: 34px;
+      background: #e8f0fb;
+      color: #0078d4;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-meta { flex: 1; min-width: 0; }
+    .card-author { font-size: 14px; font-weight: 800; color: #0f2c5e; }
+    .card-tool {
+      display: inline-block;
+      background: #e8f0fb;
+      color: #0078d4;
+      border-radius: 12px;
+      padding: 2px 9px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+    .card-time { font-size: 11px; color: #bbb; margin-top: 2px; }
+    .card-stats { display: flex; gap: 12px; align-items: flex-end; flex-shrink: 0; }
+    .card-score { font-size: 24px; font-weight: 900; color: #0078d4; text-align: center; }
+    .card-score small { display: block; font-size: 10px; font-weight: 600; color: #bbb; }
+    .card-comments-count { font-size: 24px; font-weight: 900; color: #6b7280; text-align: center; }
+    .card-comments-count small { display: block; font-size: 10px; font-weight: 600; color: #bbb; }
+    .card-description {
+      font-size: 12.5px;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 9px;
+    }
+    .card-prompt {
+      background: #f5f9ff;
+      border-left: 3px solid #0078d4;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #2a2a2a;
+      line-height: 1.6;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .show-more-btn {
+      background: none;
+      border: none;
+      color: #0078d4;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      display: block;
+      margin-top: 5px;
+      font-family: inherit;
+    }
+
+    /* ── COMMENTS ── */
+    .comments-section { margin-top: 12px; border-top: 1px solid #e8f0fb; padding-top: 10px; }
+    .comments-toggle {
+      background: none;
+      border: none;
+      color: #0078d4;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .comments-toggle:hover { text-decoration: underline; }
+    .comments-list { margin-top: 10px; }
+    .comment-item {
+      display: flex;
+      gap: 9px;
+      margin-bottom: 9px;
+      align-items: flex-start;
+    }
+    .comment-avatar {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, #0078d4, #1a4fa0);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .comment-bubble {
+      background: #f5f9ff;
+      border: 1px solid #e0eefb;
+      border-radius: 0 10px 10px 10px;
+      padding: 8px 12px;
+      flex: 1;
+    }
+    .comment-author { font-size: 11.5px; font-weight: 700; color: #0f2c5e; }
+    .comment-time   { font-size: 10px; color: #bbb; margin-left: 6px; }
+    .comment-body   { font-size: 12.5px; color: #333; margin-top: 3px; line-height: 1.5; }
+    .comment-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      align-items: flex-start;
+    }
+    .comment-form input[type=text] {
+      flex: 1;
+      border: 1.5px solid #d0e4f7;
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      background: white;
+    }
+    .comment-form input[type=text]:focus { border-color: #0078d4; }
+    .comment-send {
+      background: #0078d4;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .comment-send:hover { opacity: 0.88; }
+    .comment-send:disabled { opacity: 0.5; cursor: not-allowed; }
+    .comment-name {
+      width: 120px;
+      flex-shrink: 0;
+      border: 1.5px solid #d0e4f7;
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      background: white;
+    }
+    .comment-name:focus { border-color: #0078d4; }
+
+    /* ── REACTIONS ── */
+    .reactions-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    /* ── EMOJI PICKER ── */
+    .emoji-picker-wrap { position: relative; display: inline-block; }
+    .add-reaction-btn {
+      background: #f1f5f9; border: 1.5px dashed #cbd5e1; border-radius: 20px;
+      padding: 4px 10px; font-size: 18px; cursor: pointer; line-height: 1;
+      transition: all 0.15s; color: #64748b;
+    }
+    .add-reaction-btn:hover { background: #e2e8f0; border-color: #94a3b8; }
+    .emoji-picker {
+      position: absolute; bottom: calc(100% + 6px); left: 0;
+      background: white; border: 1px solid #e2e8f0;
+      border-radius: 12px; box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+      padding: 10px; z-index: 200;
+      display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px;
+      width: 268px;
+    }
+    .emoji-picker-emoji {
+      background: none; border: none; font-size: 20px; cursor: pointer;
+      border-radius: 6px; padding: 3px; line-height: 1; text-align: center;
+      transition: background 0.1s;
+    }
+    .emoji-picker-emoji:hover { background: #f1f5f9; }
+    .emoji-picker-emoji.picked { background: #dbeafe; }
+
+    .reaction-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #f5f9ff;
+      border: 1.5px solid #d0e4f7;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: #333;
+    }
+    .reaction-btn:hover { background: #e8f0fb; border-color: #0078d4; transform: scale(1.06); }
+    .reaction-btn.reacted { background: #0078d4; border-color: #0078d4; color: white; }
+    .reaction-btn .emoji { font-size: 16px; line-height: 1; }
+    .reaction-btn .rcount { font-size: 12px; font-weight: 700; }
+
+    /* ── POLL ── */
+    .poll-body { padding: 20px; }
+    .poll-question { font-size: 14px; font-weight: 700; color: #0f2c5e; margin-bottom: 14px; line-height: 1.4; }
+    .poll-option { margin-bottom: 10px; }
+    .poll-btn {
+      width: 100%;
+      background: #f5f9ff;
+      border: 1.5px solid #d0e4f7;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      color: #1a1a2e;
+    }
+    .poll-btn:hover:not(:disabled) { background: #e8f0fb; border-color: #0078d4; }
+    .poll-btn.my-vote { border-color: #0078d4; color: #0078d4; background: #eef6ff; }
+    .poll-btn:disabled { cursor: default; }
+    .poll-bar-wrap { margin-top: 5px; }
+    .poll-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 3px; }
+    .poll-bar-track { height: 7px; background: #e8f0fb; border-radius: 4px; overflow: hidden; }
+    .poll-bar-fill { height: 100%; background: linear-gradient(90deg, #0078d4, #5ec8f2); border-radius: 4px; transition: width 0.5s ease; }
+    .poll-total { font-size: 12px; color: #aaa; text-align: center; margin-top: 12px; }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      background: #0f2c5e;
+      color: rgba(255,255,255,0.65);
+      text-align: center;
+      padding: 22px 24px;
+      font-size: 13px;
+    }
+    .site-footer strong { color: white; }
+    .team-chips { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .team-chip {
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+    }
+
+    /* ── ADMIN TALLY ── */
+    .admin-wrap { background: #f8fafc; border-top: 2px solid #e2e8f0; padding: 16px 24px; }
+    .admin-trigger {
+      display: block; margin: 0 auto;
+      background: none; border: 1.5px solid #cbd5e1; border-radius: 20px;
+      padding: 6px 20px; font-size: 12px; font-weight: 700; color: #64748b;
+      cursor: pointer; letter-spacing: 0.5px; transition: all 0.2s;
+    }
+    .admin-trigger:hover { background: #e2e8f0; color: #0f2c5e; border-color: #94a3b8; }
+    .admin-gate {
+      display: none; margin: 14px auto 0; max-width: 320px;
+      background: white; border: 1.5px solid #e2e8f0; border-radius: 12px;
+      padding: 18px 20px; text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    }
+    .admin-gate p { font-size: 13px; color: #64748b; margin-bottom: 12px; }
+    .admin-gate-row { display: flex; gap: 8px; }
+    .admin-gate input {
+      flex: 1; border: 1.5px solid #cbd5e1; border-radius: 8px;
+      padding: 7px 12px; font-size: 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .admin-gate input:focus { border-color: #0078d4; }
+    .admin-gate input.error { border-color: #ef4444; animation: shake 0.3s; }
+    .admin-gate-btn {
+      background: #0f2c5e; color: white; border: none; border-radius: 8px;
+      padding: 7px 16px; font-size: 13px; font-weight: 700; cursor: pointer;
+    }
+    .admin-gate-btn:hover { background: #0078d4; }
+    .admin-gate-err { font-size: 12px; color: #ef4444; margin-top: 8px; min-height: 16px; }
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      25%      { transform: translateX(-5px); }
+      75%      { transform: translateX(5px); }
+    }
+    .admin-panel { display: none; margin-top: 16px; max-width: 1100px; margin-left: auto; margin-right: auto; }
+    .admin-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .admin-panel-header h3 { font-size: 16px; font-weight: 800; color: #0f2c5e; }
+    .admin-export-btn {
+      background: #0078d4; color: white; border: none; border-radius: 8px;
+      padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer;
+    }
+    .admin-export-btn:hover { background: #005fa3; }
+    .admin-reset-btn {
+      background: #fff0f0; color: #dc2626; border: 1.5px solid #fca5a5;
+      border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 700;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .admin-reset-btn:hover { background: #fee2e2; border-color: #ef4444; }
+    .admin-table-wrap { overflow-x: auto; }
+    .admin-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+      background: white; border-radius: 10px; overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    }
+    .admin-table th {
+      background: #0f2c5e; color: white;
+      padding: 10px 14px; text-align: left; font-size: 11px;
+      font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .admin-table th.num { text-align: center; }
+    .admin-table td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    .admin-table td.num { text-align: center; font-weight: 700; }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: #f8faff; }
+    .admin-table .rank-cell { font-size: 18px; text-align: center; width: 40px; }
+    .admin-table .score-total { color: #0078d4; font-size: 15px; font-weight: 900; }
+    .admin-table .reaction-total { color: #059669; font-weight: 800; }
+    .admin-table .comment-total { color: #7c3aed; font-weight: 800; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: #0f2c5e;
+      color: white;
+      border-radius: 10px;
+      padding: 13px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: all 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── STATUS BANNER ── */
+    .status-banner {
+      display: inline-flex; align-items: center; gap: 8px;
+      border-radius: 20px; padding: 5px 18px;
+      font-size: 12px; font-weight: 800; letter-spacing: 0.8px;
+      text-transform: uppercase; margin-bottom: 10px;
+      position: relative; z-index: 1;
+    }
+    .status-upcoming { background: rgba(255,255,255,0.12); color: #a8c8ff; border: 1px solid rgba(168,200,255,0.3); }
+    .status-live { background: rgba(255,80,80,0.18); color: #ffb3b3; border: 1px solid rgba(255,80,80,0.4); animation: pulse-live 2s infinite; }
+    .status-ended { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.55); border: 1px solid rgba(255,255,255,0.2); }
+    @keyframes pulse-live { 0%,100% { opacity: 1; } 50% { opacity: 0.65; } }
+    .countdown { font-size: 13px; color: rgba(255,255,255,0.65); margin-top: 6px; position: relative; z-index: 1; }
+    .countdown strong { color: #5ec8f2; font-variant-numeric: tabular-nums; }
+
+    /* ── FILTER BAR ── */
+    .filter-bar { padding: 12px 16px 0; border-bottom: 1.5px solid #e8f0fb; }
+    .filter-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+    .filter-search {
+      flex: 1; min-width: 130px;
+      border: 1.5px solid #d0e4f7; border-radius: 20px;
+      padding: 7px 14px; font-size: 13px; font-family: inherit;
+      outline: none; background: #f8fbff;
+    }
+    .filter-search:focus { border-color: #0078d4; background: white; }
+    .sort-select {
+      border: 1.5px solid #d0e4f7; border-radius: 20px;
+      padding: 7px 12px; font-size: 12px; font-weight: 700;
+      font-family: inherit; outline: none; background: white;
+      color: #0f2c5e; cursor: pointer;
+    }
+    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; padding-bottom: 10px; }
+    .filter-chip {
+      background: #f1f5f9; border: 1.5px solid #e2e8f0;
+      border-radius: 20px; padding: 4px 12px;
+      font-size: 11px; font-weight: 700; color: #64748b;
+      cursor: pointer; transition: all 0.15s; font-family: inherit;
+    }
+    .filter-chip:hover { background: #e8f0fb; border-color: #0078d4; color: #0078d4; }
+    .filter-chip.active { background: #0078d4; border-color: #0078d4; color: white; }
+
+    /* ── TOP 3 WINNER CARDS ── */
+    .prompt-card.is-winner { border-color: #fbbf24; background: linear-gradient(135deg, #fffbeb 0%, #fff 60%); }
+    .prompt-card.is-winner:hover { border-color: #f59e0b; box-shadow: 0 4px 20px rgba(245,158,11,0.18); }
+
+    /* ── CATEGORY TAG ── */
+    .card-category {
+      display: inline-block; background: #f0fdf4; color: #15803d;
+      border: 1px solid #bbf7d0; border-radius: 12px;
+      padding: 2px 8px; font-size: 10px; font-weight: 700; margin-left: 5px;
+    }
+
+    /* ── COPY PROMPT BUTTON ── */
+    .copy-prompt-btn {
+      float: right; margin-left: 8px; margin-bottom: 4px;
+      background: rgba(0,120,212,0.08); border: 1px solid #d0e4f7;
+      border-radius: 8px; padding: 2px 9px;
+      font-size: 11px; font-weight: 700; color: #0078d4;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .copy-prompt-btn:hover { background: #e8f0fb; }
+    .copy-prompt-btn.copied { color: #15803d; border-color: #bbf7d0; background: #f0fdf4; }
+
+    /* ── ADMIN DELETE ── */
+    .delete-card-btn {
+      display: none; background: none; border: 1px solid #fecaca;
+      border-radius: 6px; padding: 2px 7px;
+      font-size: 12px; color: #ef4444; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .admin-mode .delete-card-btn { display: inline-block; }
+    .delete-card-btn:hover { background: #fef2f2; border-color: #ef4444; }
+
+    /* ── CONFETTI ── */
+    .confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+
+    /* ── SUB LIMIT NOTE ── */
+    .sub-limit-note { font-size: 11.5px; color: #64748b; text-align: center; margin-top: 8px; }
+    .sub-limit-note strong { color: #0078d4; }
+    .form-locked-msg {
+      display: none; background: #f0fdf4; border: 1.5px solid #86efac;
+      border-radius: 10px; padding: 14px 16px; text-align: center;
+      margin: 0 20px 16px; font-size: 13px; color: #15803d; font-weight: 600;
+      line-height: 1.5;
+    }
+    .form-locked-msg .locked-name { color: #0f2c5e; font-weight: 800; }
+    .submit-form.locked { opacity: 0.45; pointer-events: none; user-select: none; }
+
+    /* ── IDENTITY BAR ── */
+    .identity-bar {
+      background: white; border-radius: 14px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.08);
+      padding: 14px 16px; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .identity-avatar {
+      width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #0078d4, #1a4fa0);
+      color: white; font-size: 15px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .identity-text { flex: 1; min-width: 0; }
+    .identity-label { font-size: 10px; font-weight: 700; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; }
+    .identity-name { font-size: 14px; font-weight: 800; color: #0f2c5e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .identity-input {
+      flex: 1; border: 1.5px solid #d0e4f7; border-radius: 8px;
+      padding: 7px 11px; font-size: 13px; font-family: inherit;
+      outline: none; background: #f8fbff;
+    }
+    .identity-input:focus { border-color: #0078d4; background: white; }
+    .identity-set-btn {
+      background: #0078d4; color: white; border: none; border-radius: 8px;
+      padding: 7px 13px; font-size: 12px; font-weight: 700;
+      cursor: pointer; font-family: inherit; white-space: nowrap;
+    }
+    .identity-set-btn:hover { background: #005fa3; }
+    .identity-change-btn {
+      background: none; border: none; color: #aaa; font-size: 11px;
+      cursor: pointer; font-family: inherit; padding: 0; white-space: nowrap;
+    }
+    .identity-change-btn:hover { color: #0078d4; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <img src="robot.png.png" alt="" class="header-robot" aria-hidden="true">
+    <div class="header-badge">🏆 D&amp;SS TechQuest Challenge</div>
+    <h1>GenAI <span>Prompt</span> Challenge</h1>
+    <p class="subtitle">Submit your best prompt · Get others to react &amp; comment · Most engagement wins!</p>
+    <div class="dates-pill">🗓️ &nbsp;April 6 → April 24, 2026</div>
+    <div id="status-banner" class="status-banner status-upcoming">⏳ Challenge Coming Soon</div>
+    <div class="countdown" id="countdown"></div>
+    <p class="refresh-note" id="refresh-note">⟳ Auto-refreshes every 30 seconds</p>
+  </header>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+
+    <!-- LEFT: LEADERBOARD -->
+    <div>
+      <div class="panel">
+        <div class="panel-header">
+          <h2>🏆 Live Leaderboard</h2>
+          <span class="count-badge" id="sub-count">Loading…</span>
+        </div>
+        <div class="filter-bar">
+          <div class="filter-row">
+            <input class="filter-search" id="search-input" type="text" placeholder="🔍 Search prompts…" oninput="onSearch()" />
+            <select class="sort-select" id="sort-select" onchange="onSort()">
+              <option value="reactions">🔥 Top Reactions</option>
+              <option value="comments">💬 Most Commented</option>
+              <option value="newest">🕐 Newest First</option>
+            </select>
+          </div>
+          <div class="filter-chips" id="filter-chips"></div>
+        </div>
+        <div class="leaderboard-body" id="leaderboard">
+          <div class="empty-state">
+            <div class="ei">⏳</div>
+            <p>Loading prompts…</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SUBMIT + POLL -->
+    <div>
+      <!-- IDENTITY BAR -->
+      <div class="identity-bar" id="identity-bar">
+        <div class="identity-avatar" id="identity-avatar">👤</div>
+        <div class="identity-text" id="identity-known" style="display:none">
+          <div class="identity-label">Participating as</div>
+          <div class="identity-name" id="identity-display"></div>
+        </div>
+        <input class="identity-input" id="identity-input" type="text"
+               placeholder="Enter your name to get started…" maxlength="100"
+               onkeydown="if(event.key==='Enter') setIdentity()" />
+        <button class="identity-set-btn" id="identity-set-btn" onclick="setIdentity()">Go →</button>
+        <button class="identity-change-btn" id="identity-change-btn" style="display:none" onclick="changeIdentity()">Change</button>
+      </div>
+
+      <!-- SUBMIT FORM -->
+      <div class="panel">
+        <div class="panel-header"><h2>📝 Submit Your Prompt</h2></div>
+        <form class="submit-form" id="submit-form" onsubmit="submitPrompt(event)">
+          <div class="form-group" id="name-field-group">
+            <label>Your Name</label>
+            <input name="author_name" id="author-name-input" type="text" placeholder="First Last" required maxlength="100" />
+          </div>
+          <div class="form-group">
+            <label>AI Tool Used</label>
+            <select name="ai_tool" required>
+              <option value="">Select a tool…</option>
+              <option>Microsoft Copilot</option>
+              <option>ChatGPT</option>
+              <option>Claude</option>
+              <option>Gemini</option>
+              <option>GitHub Copilot</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select name="category" required>
+              <option value="">Pick a category…</option>
+              <option value="planning">📋 Planning &amp; organization</option>
+              <option value="writing">✍️ Writing &amp; editing</option>
+              <option value="summarizing">📄 Summarizing documents</option>
+              <option value="comparing">⚖️ Comparing options</option>
+              <option value="templates">🔁 Reusable templates</option>
+              <option value="brainstorming">💡 Brainstorming ideas</option>
+              <option value="other">💬 Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>What's it for?</label>
+            <input name="description" type="text" placeholder="e.g. Summarize a long email thread" required maxlength="300" />
+            <div class="hint">One sentence describing the goal</div>
+          </div>
+          <div class="form-group">
+            <label>Your Prompt</label>
+            <textarea name="prompt_text" placeholder="Paste your full prompt here…" required maxlength="2000"></textarea>
+            <div class="hint">Copy/paste the exact prompt you used</div>
+          </div>
+          <button type="submit" class="submit-btn" id="submit-btn">🚀 Submit Prompt</button>
+        </form>
+        <div class="form-locked-msg" id="form-locked-msg"></div>
+      </div>
+
+      <!-- POLL -->
+      <div class="panel">
+        <div class="panel-header"><h2>📊 Quick Poll</h2></div>
+        <div class="poll-body">
+          <p class="poll-question">What type of AI prompt helps you most at work?</p>
+          <div id="poll-options"><p style="color:#aaa;font-size:13px">Loading…</p></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ADMIN TALLY -->
+  <div class="admin-wrap">
+    <button class="admin-trigger" onclick="toggleAdmin()">� Admin Tally</button>
+
+    <!-- Password gate -->
+    <div class="admin-gate" id="admin-gate">
+      <p>🔐 Enter the admin password to view the tally.</p>
+      <div class="admin-gate-row">
+        <input type="password" id="admin-pw" placeholder="Password" maxlength="30"
+               onkeydown="if(event.key==='Enter') checkAdminPw()" />
+        <button class="admin-gate-btn" onclick="checkAdminPw()">Unlock</button>
+      </div>
+      <div class="admin-gate-err" id="admin-gate-err"></div>
+    </div>
+
+    <div class="admin-panel" id="admin-panel">
+      <div class="admin-panel-header">
+        <h3>📋 Participant Tally — All Entries</h3>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="admin-export-btn" onclick="exportAdminCSV()">⬇ Export CSV</button>
+          <button class="admin-reset-btn" onclick="resetAll()">🗑️ Reset All</button>
+        </div>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="admin-table">
+          <thead>
+            <tr>
+              <th class="num">Rank</th>
+              <th>Author</th>
+              <th class="num">Entries</th>
+              <th class="num">Reactions</th>
+              <th class="num">Comments</th>
+              <th class="num">Score</th>
+            </tr>
+          </thead>
+          <tbody id="admin-tbody"><tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px">Click Admin Tally to load…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <strong>Questions? Reach out to the TechQuest Team</strong>
+    <div class="team-chips">
+      <span class="team-chip">Cerrone Mitchell</span>
+      <span class="team-chip">Eduardo Tovar</span>
+      <span class="team-chip">Grace Landry</span>
+      <span class="team-chip">Tanya Muswera</span>
+    </div>
+  </footer>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- RESET CONFIRMATION MODAL -->
+  <div id="reset-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:32px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="font-size:42px;text-align:center;margin-bottom:14px;">⚠️</div>
+      <h3 style="margin:0 0 10px;font-size:18px;color:#0f2c5e;text-align:center;">Reset All Data?</h3>
+      <p id="reset-modal-counts" style="font-size:14px;color:#475569;text-align:center;margin-bottom:8px;"></p>
+      <p style="font-size:13px;color:#64748b;text-align:center;margin-bottom:24px;">You'll have <strong>30 seconds</strong> to undo this before it's permanent.</p>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button onclick="closeResetModal()" style="padding:10px 24px;border-radius:8px;border:1px solid #cbd5e1;background:white;font-size:14px;font-weight:600;cursor:pointer;color:#475569;">Cancel</button>
+        <button onclick="confirmReset()" style="padding:10px 24px;border-radius:8px;border:none;background:#ef4444;color:white;font-size:14px;font-weight:700;cursor:pointer;">Yes, Reset All</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNDO BANNER -->
+  <div id="undo-banner" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;border-radius:12px;padding:14px 22px;font-size:14px;font-weight:600;z-index:999;gap:14px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,0.35);white-space:nowrap;">
+    <span>🗑️ All data has been reset.</span>
+    <button onclick="undoReset()" style="background:#22c55e;color:white;border:none;border-radius:7px;padding:6px 16px;font-weight:700;cursor:pointer;font-size:13px;">↩ Undo</button>
+    <span style="color:#94a3b8;font-size:12px;">Expires in <span id="undo-timer">30</span>s</span>
+  </div>
+
+  <script>
+    // ── CONFIG ──────────────────────────────────────────────────────────────
+    const SUPABASE_URL = 'https://rugtsqsavrfrxmoonhiw.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1Z3RzcXNhdnJmcnhtb29uaGl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NDI4MjUsImV4cCI6MjA4OTUxODgyNX0.JA4g-L8yoC0aVgZvE7IUD6VOQ6Hbe1kKQPtF5c-6IWo';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const EMOJIS = [
+      '👍','❤️','🔥','🚀','🧠','😂','😮','😢','🎉','💯',
+      '✅','⭐','💡','👏','🙌','😎','🤩','💪','🏆','🎯',
+      '💎','🌟','🔑','⚡','🎊','🤔','👀','🙏','😍','🥳',
+      '😅','🤣','🥰','😇','🤯','🤖','👾','🦄','🐉','🦁',
+      '🍕','☕','🎵','🎮','📚','🛠️','🔧','📈','💻','🌈',
+    ];
+    const MEDALS          = { 1: '🥇', 2: '🥈', 3: '🥉' };
+    const CHALLENGE_START = new Date('2026-04-06T00:00:00');
+    const CHALLENGE_END   = new Date('2026-04-24T23:59:59');
+    const CATEGORIES = [
+      { key: 'all',           label: '🌐 All' },
+      { key: 'planning',      label: '📋 Planning' },
+      { key: 'writing',       label: '✍️ Writing' },
+      { key: 'summarizing',   label: '📄 Summarizing' },
+      { key: 'comparing',     label: '⚖️ Comparing' },
+      { key: 'templates',     label: '🔁 Templates' },
+      { key: 'brainstorming', label: '💡 Brainstorming' },
+      { key: 'other',         label: '💬 Other' },
+    ];
+    const POLL_OPTIONS = [
+      { key: 'planning',      label: '📋 Planning & organization' },
+      { key: 'writing',       label: '✍️ Writing & editing' },
+      { key: 'summarizing',   label: '📄 Summarizing documents' },
+      { key: 'comparing',     label: '⚖️ Comparing options' },
+      { key: 'templates',     label: '🔁 Reusable templates' },
+      { key: 'brainstorming', label: '💡 Brainstorming ideas' },
+    ];
+
+    // ── STATE ────────────────────────────────────────────────────────────────
+    let submissions = [];
+    let reactionMap = {};   // { submissionId: { emoji: count } }    let commentsMap = {};   // { submissionId: [ comment, ... ] }    let pollVotes   = {};   // { optionKey: count }
+    let myPollVote     = null;
+    let currentSort    = 'reactions';
+    let searchTerm     = '';
+    let categoryFilter = 'all';
+    let myName         = localStorage.getItem('tq_myname') || '';
+
+    // ── IDENTITY ─────────────────────────────────────────────────────────────
+    function getBid() {
+      let id = localStorage.getItem('tq_bid');
+      if (!id) { id = crypto.randomUUID(); localStorage.setItem('tq_bid', id); }
+      return id;
+    }
+    function getMyReactions(sid) {
+      return JSON.parse(localStorage.getItem('tq_r_' + sid) || '[]');
+    }
+    function saveMyReactions(sid, arr) {
+      localStorage.setItem('tq_r_' + sid, JSON.stringify(arr));
+    }
+
+    // ── DATA LOADING ─────────────────────────────────────────────────────────
+    async function loadAll() {
+      await Promise.all([loadSubmissions(), loadPoll()]);
+      const now = new Date();
+      document.getElementById('refresh-note').textContent =
+        '⟳ Last updated ' + now.toLocaleTimeString() + ' · Auto-refreshes every 30s';
+      renderLeaderboard();
+      renderPoll();
+      renderFilterChips();
+      updateSubLimitNote();
+      if (adminOpen) renderAdminTally();
+    }
+
+    async function loadSubmissions() {
+      const [subRes, reactRes, commRes] = await Promise.all([
+        db.from('submissions').select('*').order('created_at', { ascending: false }),
+        db.from('reactions').select('submission_id, emoji'),
+        db.from('comments').select('*').order('created_at', { ascending: true }),
+      ]);
+      submissions = subRes.data || [];
+      reactionMap = {};
+      for (const r of (reactRes.data || [])) {
+        if (!reactionMap[r.submission_id]) reactionMap[r.submission_id] = {};
+        reactionMap[r.submission_id][r.emoji] = (reactionMap[r.submission_id][r.emoji] || 0) + 1;
+      }
+      commentsMap = {};
+      for (const c of (commRes.data || [])) {
+        if (!commentsMap[c.submission_id]) commentsMap[c.submission_id] = [];
+        commentsMap[c.submission_id].push(c);
+      }
+      submissions.sort((a, b) => {
+        const diff = getScore(b.id) - getScore(a.id);
+        return diff !== 0 ? diff : new Date(a.created_at) - new Date(b.created_at);
+      });
+    }
+
+    async function loadPoll() {
+      const { data } = await db.from('poll_votes').select('option_key');
+      pollVotes = {};
+      for (const v of (data || [])) {
+        pollVotes[v.option_key] = (pollVotes[v.option_key] || 0) + 1;
+      }
+      const { data: myVote } = await db
+        .from('poll_votes').select('option_key')
+        .eq('browser_id', getBid()).maybeSingle();
+      myPollVote = myVote?.option_key || null;
+    }
+
+    function getScore(sid) {
+      return Object.values(reactionMap[sid] || {}).reduce((s, n) => s + n, 0);
+    }
+
+    // ── FILTER / SORT ────────────────────────────────────────────────────────
+    function filterAndSort(subs) {
+      let result = subs.slice();
+      if (categoryFilter !== 'all') result = result.filter(s => s.category === categoryFilter);
+      if (searchTerm) {
+        const q = searchTerm.toLowerCase();
+        result = result.filter(s =>
+          s.author_name.toLowerCase().includes(q) ||
+          s.description.toLowerCase().includes(q) ||
+          s.prompt_text.toLowerCase().includes(q) ||
+          (s.ai_tool || '').toLowerCase().includes(q)
+        );
+      }
+      if (currentSort === 'comments') {
+        result.sort((a,b) => (commentsMap[b.id]||[]).length - (commentsMap[a.id]||[]).length);
+      } else if (currentSort === 'newest') {
+        result.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      }
+      return result;
+    }
+
+    // ── RENDER LEADERBOARD ───────────────────────────────────────────────────
+    function renderLeaderboard() {
+      const el = document.getElementById('leaderboard');
+      const ct = document.getElementById('sub-count');
+      ct.textContent = submissions.length + (submissions.length === 1 ? ' prompt' : ' prompts');
+
+      el.innerHTML = '';
+      if (submissions.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = '<div class="ei">🚀</div>';
+        const p = document.createElement('p');
+        p.textContent = 'No prompts yet — be the first to submit!';
+        empty.appendChild(p);
+        el.appendChild(empty);
+        return;
+      }
+      const visible = filterAndSort(submissions);
+      if (visible.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = '<div class="ei">🔍</div>';
+        const p = document.createElement('p');
+        p.textContent = 'No prompts match your filter.';
+        empty.appendChild(p);
+        el.appendChild(empty);
+        return;
+      }
+      visible.forEach(sub => {
+        const globalRank = submissions.indexOf(sub) + 1;
+        el.appendChild(buildCard(sub, globalRank));
+      });
+    }
+
+    function buildCard(sub, rank) {
+      const score   = getScore(sub.id);
+      const myReact = getMyReactions(sub.id);
+
+      const card = document.createElement('div');
+      card.className = 'prompt-card' + (rank <= 3 ? ' is-winner' : '');
+
+      // ── Top row ──
+      const top = document.createElement('div');
+      top.className = 'card-top';
+
+      const rankEl = document.createElement('div');
+      if (MEDALS[rank]) {
+        rankEl.className = 'rank-medal';
+        rankEl.textContent = MEDALS[rank];
+      } else {
+        rankEl.className = 'rank-num';
+        rankEl.textContent = rank;
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'card-meta';
+
+      const authorLine = document.createElement('div');
+      const aSpan = document.createElement('span');
+      aSpan.className = 'card-author';
+      aSpan.textContent = sub.author_name;
+      const tSpan = document.createElement('span');
+      tSpan.className = 'card-tool';
+      tSpan.textContent = sub.ai_tool;
+      authorLine.appendChild(aSpan);
+      authorLine.appendChild(tSpan);
+      if (sub.category) {
+        const CAT_LABELS = { planning:'📋 Planning', writing:'✍️ Writing', summarizing:'📄 Summarizing', comparing:'⚖️ Comparing', templates:'🔁 Templates', brainstorming:'💡 Brainstorming', other:'💬 Other' };
+        const catSpan = document.createElement('span');
+        catSpan.className = 'card-category';
+        catSpan.textContent = CAT_LABELS[sub.category] || sub.category;
+        authorLine.appendChild(catSpan);
+      }
+
+      const timeEl = document.createElement('div');
+      timeEl.className = 'card-time';
+      timeEl.textContent = new Date(sub.created_at).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      meta.appendChild(authorLine);
+      meta.appendChild(timeEl);
+
+      const statsEl = document.createElement('div');
+      statsEl.className = 'card-stats';
+
+      const scoreEl = document.createElement('div');
+      scoreEl.className = 'card-score';
+      scoreEl.textContent = score;
+      const scoreLabel = document.createElement('small');
+      scoreLabel.textContent = 'reactions';
+      scoreEl.appendChild(scoreLabel);
+
+      const commentCountEl = document.createElement('div');
+      commentCountEl.className = 'card-comments-count';
+      commentCountEl.textContent = (commentsMap[sub.id] || []).length;
+      const commentCountLabel = document.createElement('small');
+      commentCountLabel.textContent = 'comments';
+      commentCountEl.appendChild(commentCountLabel);
+
+      statsEl.appendChild(scoreEl);
+      statsEl.appendChild(commentCountEl);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'delete-card-btn';
+      delBtn.title = 'Delete this submission (admin only)';
+      delBtn.textContent = '🗑️';
+      delBtn.onclick = (e) => { e.stopPropagation(); deleteSubmission(sub.id, sub.author_name); };
+      statsEl.appendChild(delBtn);
+
+      top.appendChild(rankEl);
+      top.appendChild(meta);
+      top.appendChild(statsEl);
+      card.appendChild(top);
+
+      // ── Description ──
+      const desc = document.createElement('div');
+      desc.className = 'card-description';
+      desc.textContent = '→ ' + sub.description;
+      card.appendChild(desc);
+
+      // ── Prompt text (truncate if long) ──
+      const promptBox = document.createElement('div');
+      promptBox.className = 'card-prompt';
+      // Copy button (floats right)
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-prompt-btn';
+      copyBtn.textContent = '📋 Copy';
+      copyBtn.onclick = (e) => { e.stopPropagation(); copyPrompt(sub.prompt_text, copyBtn); };
+      promptBox.appendChild(copyBtn);
+      // Text content via text node so copy button isn't cleared
+      const textNode = document.createTextNode('');
+      promptBox.appendChild(textNode);
+      const MAX = 240;
+      if (sub.prompt_text.length > MAX) {
+        const short = sub.prompt_text.slice(0, MAX);
+        textNode.textContent = short + '…';
+        const btn = document.createElement('button');
+        btn.className = 'show-more-btn';
+        btn.textContent = 'Show full prompt ▾';
+        let open = false;
+        btn.onclick = () => {
+          open = !open;
+          textNode.textContent = open ? sub.prompt_text : short + '…';
+          btn.textContent = open ? 'Show less ▴' : 'Show full prompt ▾';
+        };
+        promptBox.appendChild(btn);
+      } else {
+        textNode.textContent = sub.prompt_text;
+      }
+      card.appendChild(promptBox);
+
+      // ── Reactions ──
+      const reactRow = document.createElement('div');
+      reactRow.className = 'reactions-row';
+
+      function refreshReactRow() {
+        // Remove all existing reaction buttons (not the picker wrap)
+        Array.from(reactRow.children).forEach(c => { if (!c.classList.contains('emoji-picker-wrap')) reactRow.removeChild(c); });
+        const rm = reactionMap[sub.id] || {};
+        const myR = getMyReactions(sub.id);
+        Object.entries(rm).sort((a,b)=>b[1]-a[1]).forEach(([emoji, count]) => {
+          const reacted = myR.includes(emoji);
+          const btn = document.createElement('button');
+          btn.className = 'reaction-btn' + (reacted ? ' reacted' : '');
+          btn.title = reacted ? 'Remove reaction' : 'React with ' + emoji;
+          const eSpan = document.createElement('span'); eSpan.className = 'emoji'; eSpan.textContent = emoji;
+          const cSpan = document.createElement('span'); cSpan.className = 'rcount'; cSpan.textContent = count;
+          btn.appendChild(eSpan); btn.appendChild(cSpan);
+          btn.onclick = () => react(sub.id, emoji);
+          reactRow.insertBefore(btn, pickerWrap);
+        });
+        // Update picker picked states
+        pickerWrap.querySelectorAll('.emoji-picker-emoji').forEach(el => {
+          el.classList.toggle('picked', myR.includes(el.dataset.emoji));
+        });
+      }
+
+      // Emoji picker
+      const pickerWrap = document.createElement('div');
+      pickerWrap.className = 'emoji-picker-wrap';
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-reaction-btn';
+      addBtn.textContent = '+';
+      addBtn.title = 'Add a reaction';
+
+      const picker = document.createElement('div');
+      picker.className = 'emoji-picker';
+      picker.style.display = 'none';
+      EMOJIS.forEach(e => {
+        const ep = document.createElement('button');
+        ep.className = 'emoji-picker-emoji';
+        ep.dataset.emoji = e;
+        ep.textContent = e;
+        ep.onclick = async (ev) => {
+          ev.stopPropagation();
+          await react(sub.id, e);
+          refreshReactRow();
+        };
+        picker.appendChild(ep);
+      });
+
+      addBtn.onclick = (ev) => {
+        ev.stopPropagation();
+        const open = picker.style.display === 'none';
+        document.querySelectorAll('.emoji-picker').forEach(p => p.style.display = 'none');
+        picker.style.display = open ? 'grid' : 'none';
+      };
+      document.addEventListener('click', () => { picker.style.display = 'none'; }, { capture: false });
+
+      pickerWrap.appendChild(addBtn);
+      pickerWrap.appendChild(picker);
+      reactRow.appendChild(pickerWrap);
+      refreshReactRow();
+      card.appendChild(reactRow);
+
+      // ── Comments Section ──
+      const comments = commentsMap[sub.id] || [];
+      const commSect = document.createElement('div');
+      commSect.className = 'comments-section';
+
+      const toggle = document.createElement('button');
+      toggle.className = 'comments-toggle';
+      toggle.textContent = `💬 ${comments.length} comment${comments.length !== 1 ? 's' : ''} ▾`;
+
+      const commBody = document.createElement('div');
+      commBody.style.display = 'none';
+
+      // Comment list
+      const list = document.createElement('div');
+      list.className = 'comments-list';
+      comments.forEach(c => list.appendChild(buildComment(c)));
+      commBody.appendChild(list);
+
+      // Comment form
+      const form = document.createElement('div');
+      form.className = 'comment-form';
+      const nameIn = document.createElement('input');
+      nameIn.type = 'text'; nameIn.className = 'comment-name';
+      nameIn.placeholder = 'Your name'; nameIn.maxLength = 100;
+      if (myName) nameIn.value = myName;
+      const bodyIn = document.createElement('input');
+      bodyIn.type = 'text';
+      bodyIn.placeholder = 'Add a comment…'; bodyIn.maxLength = 600;
+      const sendBtn = document.createElement('button');
+      sendBtn.className = 'comment-send'; sendBtn.textContent = 'Post';
+      sendBtn.onclick = async () => {
+        const name = nameIn.value.trim();
+        const body = bodyIn.value.trim();
+        if (!name || !body) { showToast('⚠️ Enter your name and a comment.'); return; }
+        sendBtn.disabled = true; sendBtn.textContent = '…';
+        const { data, error } = await db.from('comments').insert({
+          submission_id: sub.id, author_name: name, body
+        }).select().single();
+        if (error) { showToast('❌ ' + error.message); }
+        else {
+          bodyIn.value = '';
+          list.appendChild(buildComment(data));
+          const newCount = list.children.length;
+          toggle.textContent = `💬 ${newCount} comment${newCount !== 1 ? 's' : ''} ▾`;
+          commentCountEl.firstChild.textContent = newCount;
+          showToast('💬 Comment posted!');
+        }
+        sendBtn.disabled = false; sendBtn.textContent = 'Post';
+      };
+      form.appendChild(nameIn); form.appendChild(bodyIn); form.appendChild(sendBtn);
+      commBody.appendChild(form);
+
+      toggle.onclick = () => {
+        const open = commBody.style.display === 'none';
+        commBody.style.display = open ? 'block' : 'none';
+        toggle.textContent = `💬 ${list.children.length} comment${list.children.length !== 1 ? 's' : ''} ${open ? '▴' : '▾'}`;
+      };
+
+      commSect.appendChild(toggle);
+      commSect.appendChild(commBody);
+      card.appendChild(commSect);
+
+      return card;
+    }
+
+    // ── RENDER POLL ──────────────────────────────────────────────────────────
+    function renderPoll() {
+      const el         = document.getElementById('poll-options');
+      const hasVoted   = !!myPollVote;
+      const totalVotes = Object.values(pollVotes).reduce((s, n) => s + n, 0);
+
+      el.innerHTML = '';
+      POLL_OPTIONS.forEach(opt => {
+        const votes = pollVotes[opt.key] || 0;
+        const pct   = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+        const isMe  = myPollVote === opt.key;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'poll-option';
+
+        const btn = document.createElement('button');
+        btn.className = 'poll-btn' + (isMe ? ' my-vote' : '');
+        btn.disabled  = hasVoted;
+        btn.textContent = opt.label + (isMe ? ' ✓' : '');
+        if (!hasVoted) btn.onclick = () => votePoll(opt.key);
+        wrap.appendChild(btn);
+
+        if (hasVoted) {
+          const barWrap = document.createElement('div');
+          barWrap.className = 'poll-bar-wrap';
+
+          const barLabel = document.createElement('div');
+          barLabel.className = 'poll-bar-label';
+          const lft = document.createElement('span');
+          lft.textContent = votes + (votes === 1 ? ' vote' : ' votes');
+          const rgt = document.createElement('span');
+          rgt.textContent = pct + '%';
+          barLabel.appendChild(lft);
+          barLabel.appendChild(rgt);
+
+          const track = document.createElement('div');
+          track.className = 'poll-bar-track';
+          const fill = document.createElement('div');
+          fill.className = 'poll-bar-fill';
+          fill.style.width = pct + '%';
+          track.appendChild(fill);
+
+          barWrap.appendChild(barLabel);
+          barWrap.appendChild(track);
+          wrap.appendChild(barWrap);
+        }
+        el.appendChild(wrap);
+      });
+
+      if (hasVoted && totalVotes > 0) {
+        const note = document.createElement('p');
+        note.className = 'poll-total';
+        note.textContent = totalVotes + ' total vote' + (totalVotes !== 1 ? 's' : '');
+        el.appendChild(note);
+      }
+    }
+
+    // ── BUILD COMMENT ──────────────────────────────────────────────────────────
+    function buildComment(c) {
+      const wrap = document.createElement('div');
+      wrap.className = 'comment-item';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'comment-avatar';
+      avatar.textContent = c.author_name.charAt(0).toUpperCase();
+
+      const bubble = document.createElement('div');
+      bubble.className = 'comment-bubble';
+
+      const top = document.createElement('div');
+      const aSpan = document.createElement('span');
+      aSpan.className = 'comment-author';
+      aSpan.textContent = c.author_name;
+      const tSpan = document.createElement('span');
+      tSpan.className = 'comment-time';
+      tSpan.textContent = new Date(c.created_at).toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      top.appendChild(aSpan); top.appendChild(tSpan);
+
+      const body = document.createElement('div');
+      body.className = 'comment-body';
+      body.textContent = c.body;
+
+      bubble.appendChild(top); bubble.appendChild(body);
+      wrap.appendChild(avatar); wrap.appendChild(bubble);
+      return wrap;
+    }
+
+    // ── ACTIONS ──────────────────────────────────────────────────────────────
+    async function submitPrompt(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn  = document.getElementById('submit-btn');
+      btn.disabled    = true;
+      btn.textContent = 'Submitting…';
+
+      const authorName = form.author_name.value.trim();
+      const { error } = await db.from('submissions').insert({
+        author_name: authorName,
+        ai_tool:     form.ai_tool.value,
+        category:    form.category.value || null,
+        description: form.description.value.trim(),
+        prompt_text: form.prompt_text.value.trim(),
+      });
+
+      if (error) {
+        showToast('❌ Error: ' + error.message);
+      } else {
+        myName = authorName;
+        localStorage.setItem('tq_myname', myName);
+        form.reset();
+        fireConfetti();
+        showToast('🎉 Prompt submitted! Good luck!');
+        await loadAll();
+        document.getElementById('leaderboard').scrollIntoView({ behavior: 'smooth' });
+      }
+
+      btn.disabled    = false;
+      btn.textContent = '🚀 Submit Prompt';
+    }
+
+    async function react(sid, emoji) {
+      const bid     = getBid();
+      const myReact = getMyReactions(sid);
+      const already = myReact.includes(emoji);
+
+      if (already) {
+        await db.from('reactions').delete()
+          .eq('submission_id', sid)
+          .eq('emoji', emoji)
+          .eq('browser_id', bid);
+        saveMyReactions(sid, myReact.filter(e => e !== emoji));
+      } else {
+        const { error } = await db.from('reactions').insert({
+          submission_id: sid, emoji, browser_id: bid,
+        });
+        if (!error) saveMyReactions(sid, [...myReact, emoji]);
+      }
+
+      await loadSubmissions();
+      renderLeaderboard();
+    }
+
+    async function votePoll(optKey) {
+      if (myPollVote) return;
+      const { error } = await db.from('poll_votes').insert({
+        option_key: optKey, browser_id: getBid(),
+      });
+      if (!error) {
+        myPollVote = optKey;
+        await loadPoll();
+        renderPoll();
+        showToast('✅ Vote recorded — thanks!');
+      }
+    }
+
+    // ── ADMIN TALLY ──────────────────────────────────────────────────────────
+    let adminOpen     = false;
+    let adminUnlocked = false;
+
+    function toggleAdmin() {
+      const gate  = document.getElementById('admin-gate');
+      const panel = document.getElementById('admin-panel');
+      const btn   = document.querySelector('.admin-trigger');
+
+      if (adminUnlocked) {
+        adminOpen = !adminOpen;
+        panel.style.display = adminOpen ? 'block' : 'none';
+        gate.style.display  = 'none';
+        btn.textContent = adminOpen ? '✕ Close Tally' : '🔒 Admin Tally';
+        if (adminOpen) renderAdminTally();
+      } else {
+        const gateVisible = gate.style.display === 'block';
+        gate.style.display = gateVisible ? 'none' : 'block';
+        btn.textContent = gateVisible ? '🔒 Admin Tally' : '🔓 Cancel';
+        if (!gateVisible) {
+          document.getElementById('admin-pw').focus();
+          document.getElementById('admin-gate-err').textContent = '';
+        }
+      }
+    }
+
+    function checkAdminPw() {
+      const input = document.getElementById('admin-pw');
+      const err   = document.getElementById('admin-gate-err');
+      if (input.value === '3192026') {
+        adminUnlocked = true;
+        adminOpen     = true;
+        document.body.classList.add('admin-mode');
+        document.getElementById('admin-gate').style.display  = 'none';
+        document.getElementById('admin-panel').style.display = 'block';
+        document.querySelector('.admin-trigger').textContent  = '✕ Close Tally';
+        input.value = '';
+        renderAdminTally();
+      } else {
+        err.textContent = 'Incorrect password. Try again.';
+        input.classList.add('error');
+        input.value = '';
+        setTimeout(() => input.classList.remove('error'), 400);
+        input.focus();
+      }
+    }
+
+    function getAdminRows() {
+      const byAuthor = {};
+      for (const sub of submissions) {
+        const key = sub.author_name;
+        if (!byAuthor[key]) byAuthor[key] = { name: key, entries: 0, reactions: 0, comments: 0 };
+        byAuthor[key].entries++;
+        byAuthor[key].reactions += getScore(sub.id);
+        byAuthor[key].comments  += (commentsMap[sub.id] || []).length;
+      }
+      return Object.values(byAuthor).sort((a, b) =>
+        (b.reactions + b.comments) - (a.reactions + a.comments)
+      );
+    }
+
+    function renderAdminTally() {
+      const tbody = document.getElementById('admin-tbody');
+      const rows  = getAdminRows();
+      if (rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#aaa;padding:20px">No submissions yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = '';
+      rows.forEach((r, i) => {
+        const rank  = i + 1;
+        const medal = { 1: '🥇', 2: '🥈', 3: '🥉' }[rank] || rank;
+        const score = r.reactions + r.comments;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="rank-cell">${medal}</td>
+          <td><strong>${escHtml(r.name)}</strong></td>
+          <td class="num">${r.entries}</td>
+          <td class="num reaction-total">${r.reactions}</td>
+          <td class="num comment-total">${r.comments}</td>
+          <td class="num score-total">${score}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function exportAdminCSV() {
+      const rows = getAdminRows();
+      const header = ['Rank','Author','Entries','Reactions','Comments','Score'];
+      const lines  = [header.join(',')];
+      rows.forEach((r, i) => {
+        const score = r.reactions + r.comments;
+        lines.push([
+          i + 1,
+          `"${r.name.replace(/"/g,'""')}"`,
+          r.entries,
+          r.reactions, r.comments, score
+        ].join(','));
+      });
+      const blob = new Blob([lines.join('\n')], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'TechQuest_Tally.csv';
+      a.click();
+    }
+
+    // ── IDENTITY ────────────────────────────────────────────────────────────────
+    function renderIdentityBar() {
+      const known       = document.getElementById('identity-known');
+      const input       = document.getElementById('identity-input');
+      const setBtn      = document.getElementById('identity-set-btn');
+      const changeBtn   = document.getElementById('identity-change-btn');
+      const dispEl      = document.getElementById('identity-display');
+      const avatarEl    = document.getElementById('identity-avatar');
+      const nameInput   = document.getElementById('author-name-input');
+      if (myName) {
+        known.style.display   = 'block';
+        input.style.display   = 'none';
+        setBtn.style.display  = 'none';
+        changeBtn.style.display = 'inline-block';
+        dispEl.textContent    = myName;
+        avatarEl.textContent  = myName.charAt(0).toUpperCase();
+        if (nameInput) nameInput.value = myName;
+      } else {
+        known.style.display   = 'none';
+        input.style.display   = 'flex';
+        setBtn.style.display  = 'inline-block';
+        changeBtn.style.display = 'none';
+        avatarEl.textContent  = '👤';
+        if (nameInput) nameInput.value = '';
+      }
+    }
+
+    function setIdentity() {
+      const val = document.getElementById('identity-input').value.trim();
+      if (!val) return;
+      myName = val;
+      localStorage.setItem('tq_myname', myName);
+      renderIdentityBar();
+      updateSubLimitNote();
+    }
+
+    function changeIdentity() {
+      const input = document.getElementById('identity-input');
+      input.value = myName;
+      myName = '';
+      localStorage.removeItem('tq_myname');
+      renderIdentityBar();
+      updateSubLimitNote();
+      input.focus();
+    }
+
+    // ── CHALLENGE STATUS & COUNTDOWN ─────────────────────────────────────
+    function getChallengeStatus() {
+      const now = new Date();
+      if (now < CHALLENGE_START) return 'upcoming';
+      if (now <= CHALLENGE_END)  return 'live';
+      return 'ended';
+    }
+
+    function renderStatusBanner() {
+      const el     = document.getElementById('status-banner');
+      const status = getChallengeStatus();
+      if (status === 'upcoming') {
+        el.className = 'status-banner status-upcoming';
+        el.textContent = '⏳ Challenge Coming Soon';
+      } else if (status === 'live') {
+        el.className = 'status-banner status-live';
+        el.textContent = '🔥 LIVE NOW — Submit Your Prompt!';
+      } else {
+        el.className = 'status-banner status-ended';
+        el.textContent = '🏁 Challenge Ended — Winners Announced!';
+      }
+    }
+
+    function startCountdown() {
+      renderStatusBanner();
+      function tick() {
+        const now    = new Date();
+        const status = getChallengeStatus();
+        const target = status === 'upcoming' ? CHALLENGE_START : status === 'live' ? CHALLENGE_END : null;
+        const el     = document.getElementById('countdown');
+        if (!target) { el.textContent = ''; return; }
+        const diff = target - now;
+        if (diff <= 0) { renderStatusBanner(); el.textContent = ''; return; }
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000)  / 60000);
+        const s = Math.floor((diff % 60000)    / 1000);
+        const pad = n => String(n).padStart(2, '0');
+        const label = status === 'upcoming' ? 'Opens in' : 'Closes in';
+        el.innerHTML = `${label}: <strong>${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s</strong>`;
+      }
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    // ── SEARCH / SORT / FILTER HELPERS ────────────────────────────────────────
+    function onSearch() {
+      searchTerm = document.getElementById('search-input').value.trim();
+      renderLeaderboard();
+    }
+
+    function onSort() {
+      currentSort = document.getElementById('sort-select').value;
+      renderLeaderboard();
+    }
+
+    function renderFilterChips() {
+      const el = document.getElementById('filter-chips');
+      if (!el) return;
+      el.innerHTML = '';
+      CATEGORIES.forEach(cat => {
+        const chip = document.createElement('button');
+        chip.className = 'filter-chip' + (categoryFilter === cat.key ? ' active' : '');
+        chip.textContent = cat.label;
+        chip.onclick = () => { categoryFilter = cat.key; renderFilterChips(); renderLeaderboard(); };
+        el.appendChild(chip);
+      });
+    }
+
+    // ── SUBMISSION COUNT NOTE ───────────────────────────────────────────────
+    function updateSubLimitNote() {
+      const lockedMsg = document.getElementById('form-locked-msg');
+      const form      = document.getElementById('submit-form');
+      if (!lockedMsg || !form) return;
+
+      if (!myName) {
+        lockedMsg.style.display = 'none';
+        form.classList.remove('locked');
+        return;
+      }
+
+      const mine = submissions.filter(s => s.author_name.toLowerCase() === myName.toLowerCase()).length;
+      if (mine >= 1) {
+        form.classList.add('locked');
+        lockedMsg.style.display = 'block';
+        lockedMsg.innerHTML = `✅ You’re all set, <span class="locked-name">${escHtml(myName)}</span>!<br>
+          <span style="font-weight:400;color:#166534">Your score goes up when others react and comment on your submission. Share it with your team!</span>`;
+      } else {
+        form.classList.remove('locked');
+        lockedMsg.style.display = 'none';
+      }
+    }
+
+    // ── COPY PROMPT ─────────────────────────────────────────────────────────
+    function copyPrompt(text, btn) {
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
+      }).catch(() => showToast('❌ Copy not supported in this browser.'));
+    }
+
+    // ── RESET ALL (admin) ──────────────────────────────────────────────────────
+    let resetBackup = null;
+    let undoTimer = null;
+    let undoInterval = null;
+
+    function resetAll() {
+      if (!adminUnlocked) return;
+      const subCount  = submissions.length;
+      const pollTotal = Object.values(pollVotes).reduce((s, n) => s + n, 0);
+      document.getElementById('reset-modal-counts').innerHTML =
+        `This will permanently delete <strong>${subCount}</strong> submission${subCount !== 1 ? 's' : ''} ` +
+        `(including all reactions &amp; comments) and <strong>${pollTotal}</strong> poll vote${pollTotal !== 1 ? 's' : ''}.`;
+      document.getElementById('reset-modal').style.display = 'flex';
+    }
+
+    function closeResetModal() {
+      document.getElementById('reset-modal').style.display = 'none';
+    }
+
+    async function confirmReset() {
+      if (!adminUnlocked) return;
+      closeResetModal();
+      showToast('⏳ Backing up data…');
+
+      // Fetch full records (including browser_id) before deleting
+      const [subRes, reactRes, commRes, pollRes] = await Promise.all([
+        db.from('submissions').select('*'),
+        db.from('reactions').select('*'),
+        db.from('comments').select('*'),
+        db.from('poll_votes').select('*'),
+      ]);
+      resetBackup = {
+        submissions: subRes.data  || [],
+        reactions:   reactRes.data || [],
+        comments:    commRes.data  || [],
+        poll_votes:  pollRes.data  || [],
+      };
+
+      // Delete all — submissions cascade-deletes reactions + comments
+      await Promise.all([
+        db.from('poll_votes').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+        db.from('submissions').delete().neq('id', '00000000-0000-0000-0000-000000000000'),
+      ]);
+
+      await loadAll();
+      showUndoBanner();
+    }
+
+    async function undoReset() {
+      if (!resetBackup) return;
+      clearTimeout(undoTimer);
+      clearInterval(undoInterval);
+      hideUndoBanner();
+      showToast('⏳ Restoring data…');
+
+      const { submissions: subs, reactions, comments, poll_votes } = resetBackup;
+      resetBackup = null;
+
+      // Re-insert in dependency order, preserving original IDs
+      if (subs.length)       await db.from('submissions').insert(subs);
+      if (reactions.length)  await db.from('reactions').insert(reactions);
+      if (comments.length)   await db.from('comments').insert(comments);
+      if (poll_votes.length) await db.from('poll_votes').insert(poll_votes);
+
+      await loadAll();
+      showToast('↩️ Reset undone — all data restored!');
+    }
+
+    function showUndoBanner() {
+      let secs = 30;
+      const banner  = document.getElementById('undo-banner');
+      const timerEl = document.getElementById('undo-timer');
+      timerEl.textContent = secs;
+      banner.style.display = 'flex';
+      undoInterval = setInterval(() => {
+        secs--;
+        timerEl.textContent = secs;
+        if (secs <= 0) {
+          clearInterval(undoInterval);
+          hideUndoBanner();
+          resetBackup = null;
+        }
+      }, 1000);
+      undoTimer = setTimeout(() => { hideUndoBanner(); resetBackup = null; }, 30000);
+    }
+
+    function hideUndoBanner() {
+      document.getElementById('undo-banner').style.display = 'none';
+    }
+
+    // ── DELETE SUBMISSION (admin) ─────────────────────────────────────────────
+    async function deleteSubmission(id, name) {
+      if (!adminUnlocked) return;
+      if (!confirm(`Delete "${name}"'s submission? This cannot be undone.`)) return;
+      const { error } = await db.from('submissions').delete().eq('id', id);
+      if (error) { showToast('❌ ' + error.message); return; }
+      showToast('🗑️ Submission deleted.');
+      await loadAll();
+    }
+
+    // ── CONFETTI ─────────────────────────────────────────────────────────────
+    function fireConfetti() {
+      const canvas = document.createElement('canvas');
+      canvas.className = 'confetti-canvas';
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ['#0078d4','#5ec8f2','#fbbf24','#34d399','#f87171','#a78bfa','#fb923c'];
+      const pieces = Array.from({ length: 150 }, () => ({
+        x:  Math.random() * canvas.width,
+        y:  Math.random() * -canvas.height * 0.5,
+        r:  3 + Math.random() * 7,
+        c:  colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 5,
+        vy: 2 + Math.random() * 4,
+        rot: Math.random() * 360,
+        vr: (Math.random() - 0.5) * 7,
+      }));
+      let frame;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot * Math.PI / 180);
+          ctx.fillStyle = p.c;
+          ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.5);
+          ctx.restore();
+          p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += 0.07;
+        });
+        if (pieces.some(p => p.y < canvas.height + 20)) {
+          frame = requestAnimationFrame(draw);
+        } else {
+          cancelAnimationFrame(frame); canvas.remove();
+        }
+      }
+      draw();
+      setTimeout(() => { cancelAnimationFrame(frame); canvas.remove(); }, 4500);
+    }
+
+    // ── TOAST ────────────────────────────────────────────────────────────────
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+
+    // ── INIT ─────────────────────────────────────────────────────────────────
+    startCountdown();
+    renderFilterChips();
+    renderIdentityBar();
+    loadAll();
+    setInterval(loadAll, 30000);
+  </script>
+</body>
+</html>
