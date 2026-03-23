@@ -676,6 +676,145 @@
       cursor: pointer; font-family: inherit; padding: 0; white-space: nowrap;
     }
     .identity-change-btn:hover { color: #0078d4; }
+
+    /* ── SHARE BUTTON ── */
+    .share-btn {
+      background: none;
+      border: 1px solid #d0e4f7;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #0078d4;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .share-btn:hover { background: #e8f0fb; }
+    .share-btn.copied { color: #15803d; border-color: #bbf7d0; background: #f0fdf4; }
+
+    /* ── SHARE TOOLTIP ── */
+    .share-tip-wrap {
+      position: relative;
+      display: inline-flex;
+    }
+    .share-tip-wrap .share-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 7px);
+      right: 0;
+      width: 175px;
+      background: #0f2c5e;
+      color: white;
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 11px;
+      line-height: 1.45;
+      font-weight: 500;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+      pointer-events: none;
+      z-index: 300;
+    }
+    .share-tip-wrap .share-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      right: 14px;
+      border: 6px solid transparent;
+      border-top-color: #0f2c5e;
+    }
+    .share-tip-wrap:hover .share-tooltip { display: block; }
+
+    /* ── WINNER OVERLAY ── */
+    .winner-overlay {
+      position: fixed; inset: 0;
+      background: rgba(10, 30, 70, 0.88);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeInOverlay 0.5s ease;
+    }
+    @keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+    .winner-modal {
+      background: white;
+      border-radius: 24px;
+      padding: 40px 36px;
+      max-width: 520px;
+      width: 92%;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+      animation: slideUpModal 0.55s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    @keyframes slideUpModal {
+      from { transform: translateY(40px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .winner-modal::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 6px;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b, #fbbf24);
+    }
+    .winner-crown { font-size: 70px; margin-bottom: 10px; line-height: 1; }
+    .winner-title { font-size: 28px; font-weight: 900; color: #0f2c5e; margin-bottom: 6px; }
+    .winner-subtitle { font-size: 15px; color: #64748b; margin-bottom: 28px; }
+    .podium-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+    .podium-card {
+      border-radius: 14px;
+      padding: 16px 10px;
+      flex: 1;
+      max-width: 145px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid #e8f0fb;
+    }
+    .podium-card.first {
+      background: linear-gradient(135deg, #fffbeb, #fef3c7);
+      border-color: #fbbf24;
+      padding-top: 22px;
+    }
+    .podium-card.second {
+      background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      border-color: #cbd5e1;
+    }
+    .podium-card.third {
+      background: linear-gradient(135deg, #fff7ed, #fed7aa33);
+      border-color: #fdba74;
+    }
+    .podium-medal  { font-size: 38px; line-height: 1; }
+    .podium-place  { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; }
+    .podium-name   { font-size: 13px; font-weight: 800; color: #0f2c5e; word-break: break-word; line-height: 1.3; }
+    .podium-score  { font-size: 11px; color: #64748b; font-weight: 600; }
+    .winner-thank-you {
+      font-size: 14px;
+      color: #475569;
+      margin-bottom: 24px;
+      line-height: 1.7;
+      background: #f8faff;
+      border-radius: 10px;
+      padding: 14px 18px;
+    }
+    .winner-close-btn {
+      background: linear-gradient(135deg, #0078d4, #1a4fa0);
+      color: white; border: none; border-radius: 12px;
+      padding: 14px 36px; font-size: 16px; font-weight: 800;
+      cursor: pointer; font-family: inherit;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .winner-close-btn:hover { opacity: 0.9; transform: translateY(-1px); }
   </style>
 </head>
 <body>
@@ -818,6 +957,7 @@
         <h3>📋 Participant Tally — All Entries</h3>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="admin-export-btn" onclick="exportAdminCSV()">⬇ Export CSV</button>
+          <button class="admin-export-btn" style="background:#fbbf24;color:#0f2c5e;" onclick="winnerShown=false;showWinnerCelebration(true)">🏆 Preview Winner Screen</button>
           <button class="admin-reset-btn" onclick="resetAll()">🗑️ Reset All</button>
         </div>
       </div>
@@ -849,6 +989,22 @@
       <span class="team-chip">Tanya Muswera</span>
     </div>
   </footer>
+
+  <!-- WINNER CELEBRATION OVERLAY -->
+  <div id="winner-overlay" style="display:none;" class="winner-overlay" role="dialog" aria-modal="true" aria-labelledby="winner-modal-title">
+    <div class="winner-modal">
+      <div class="winner-crown">🏆</div>
+      <h2 class="winner-title" id="winner-modal-title">Challenge Complete!</h2>
+      <p class="winner-subtitle">Here are our top 3 finishers</p>
+      <div class="podium-wrap" id="podium-wrap"></div>
+      <p class="winner-thank-you">
+        🎉 <strong>Thank you to everyone who participated!</strong><br>
+        Your creativity and curiosity make our team great.<br>
+        <span style="font-size:13px;color:#94a3b8;">Keep exploring AI — the challenge may return!</span>
+      </p>
+      <button class="winner-close-btn" onclick="closeWinnerOverlay()">🎯 View Full Leaderboard</button>
+    </div>
+  </div>
 
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
@@ -941,6 +1097,7 @@
       renderPoll();
       renderFilterChips();
       updateSubLimitNote();
+      if (getChallengeStatus() === 'ended') showWinnerCelebration();
       if (adminOpen) renderAdminTally();
     }
 
@@ -1044,6 +1201,7 @@
 
       const card = document.createElement('div');
       card.className = 'prompt-card' + (rank <= 3 ? ' is-winner' : '');
+      card.dataset.id = sub.id;
 
       // ── Top row ──
       const top = document.createElement('div');
@@ -1224,9 +1382,31 @@
       const commSect = document.createElement('div');
       commSect.className = 'comments-section';
 
+      // Top row: comments toggle + share button
+      const commTopRow = document.createElement('div');
+      commTopRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;';
+
       const toggle = document.createElement('button');
       toggle.className = 'comments-toggle';
       toggle.textContent = `💬 ${comments.length} comment${comments.length !== 1 ? 's' : ''} ▾`;
+
+      const shareTipWrap = document.createElement('div');
+      shareTipWrap.className = 'share-tip-wrap';
+
+      const shareBtn = document.createElement('button');
+      shareBtn.className = 'share-btn';
+      shareBtn.textContent = '🔗 Share';
+      shareBtn.onclick = (e) => { e.stopPropagation(); shareSubmission(sub, shareBtn); };
+
+      const shareTip = document.createElement('div');
+      shareTip.className = 'share-tooltip';
+      shareTip.textContent = '🚀 Promote your post to earn more points! Copy this link and share it with your team via Teams or Outlook — every reaction counts toward your score.';
+
+      shareTipWrap.appendChild(shareBtn);
+      shareTipWrap.appendChild(shareTip);
+
+      commTopRow.appendChild(toggle);
+      commTopRow.appendChild(shareTipWrap);
 
       const commBody = document.createElement('div');
       commBody.style.display = 'none';
@@ -1277,7 +1457,7 @@
         toggle.textContent = `💬 ${list.children.length} comment${list.children.length !== 1 ? 's' : ''} ${open ? '▴' : '▾'}`;
       };
 
-      commSect.appendChild(toggle);
+      commSect.appendChild(commTopRow);
       commSect.appendChild(commBody);
       card.appendChild(commSect);
 
@@ -1800,6 +1980,133 @@
       await loadAll();
     }
 
+    // ── SHARE SUBMISSION ─────────────────────────────────────────────────────
+    async function shareSubmission(sub, btn) {
+      const url = new URL(window.location.href);
+      url.search = '';
+      url.searchParams.set('post', sub.id);
+      const shareUrl = url.toString();
+      const shareText = `Check out ${sub.author_name}'s AI prompt for the TechQuest GenAI Challenge: "${sub.description}" — React to support them! 🚀`;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: '🏆 TechQuest GenAI Prompt Challenge', text: shareText, url: shareUrl });
+          return;
+        } catch (_) { /* user cancelled or unsupported — fall through */ }
+      }
+
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✅ Link Copied!';
+        btn.classList.add('copied');
+        showToast('🔗 Share link copied! Send it to your colleagues.');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2800);
+      }).catch(() => { prompt('Copy this link to share:', shareUrl); });
+    }
+
+    // ── DEEP-LINK HANDLER ────────────────────────────────────────────────────
+    function handleDeepLink() {
+      const postId = new URLSearchParams(window.location.search).get('post');
+      if (!postId) return;
+      const target = document.querySelector(`.prompt-card[data-id="${CSS.escape(postId)}"]`);
+      if (!target) return;
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      target.style.transition = 'box-shadow 0.4s, border-color 0.4s';
+      target.style.boxShadow  = '0 0 0 3px #0078d4, 0 8px 30px rgba(0,120,212,0.28)';
+      target.style.borderColor = '#0078d4';
+      setTimeout(() => { target.style.boxShadow = ''; target.style.borderColor = ''; }, 3200);
+    }
+
+    // ── WINNER CELEBRATION ───────────────────────────────────────────────────
+    let winnerShown = false;
+
+    function showWinnerCelebration(force) {
+      if (!force && winnerShown) return;
+      if (!force && sessionStorage.getItem('tq_winner_shown')) return;
+      if (submissions.length === 0) return;
+
+      winnerShown = true;
+      sessionStorage.setItem('tq_winner_shown', '1');
+
+      const top3 = submissions.slice(0, 3);
+      const podium = document.getElementById('podium-wrap');
+      podium.innerHTML = '';
+
+      // Visual order: 2nd (left) → 1st (centre, tallest) → 3rd (right)
+      const slots = [];
+      if (top3.length >= 2) slots.push({ sub: top3[1], cls: 'second', medal: '🥈', place: '2nd Place' });
+      if (top3.length >= 1) slots.push({ sub: top3[0], cls: 'first',  medal: '🥇', place: '1st Place' });
+      if (top3.length >= 3) slots.push({ sub: top3[2], cls: 'third',  medal: '🥉', place: '3rd Place' });
+      if (top3.length === 1) { slots.length = 0; slots.push({ sub: top3[0], cls: 'first', medal: '🥇', place: '1st Place' }); }
+
+      slots.forEach(pos => {
+        const card = document.createElement('div');
+        card.className = 'podium-card ' + pos.cls;
+        card.innerHTML = `
+          <div class="podium-medal">${pos.medal}</div>
+          <div class="podium-place">${pos.place}</div>
+          <div class="podium-name">${escHtml(pos.sub.author_name)}</div>
+          <div class="podium-score">${getScore(pos.sub.id)} reactions</div>
+        `;
+        podium.appendChild(card);
+      });
+
+      document.getElementById('winner-overlay').style.display = 'flex';
+      fireWinnerConfetti();
+    }
+
+    function closeWinnerOverlay() {
+      document.getElementById('winner-overlay').style.display = 'none';
+      document.getElementById('leaderboard').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function fireWinnerConfetti() {
+      const canvas = document.createElement('canvas');
+      canvas.className = 'confetti-canvas';
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ['#fbbf24','#f59e0b','#0078d4','#5ec8f2','#34d399','#f87171','#a78bfa','#fb923c','#ffffff','#fde68a'];
+      const pieces = Array.from({ length: 280 }, () => ({
+        x:   Math.random() * canvas.width,
+        y:   Math.random() * -canvas.height,
+        r:   4 + Math.random() * 9,
+        c:   colors[Math.floor(Math.random() * colors.length)],
+        vx:  (Math.random() - 0.5) * 6,
+        vy:  1.5 + Math.random() * 4,
+        rot: Math.random() * 360,
+        vr:  (Math.random() - 0.5) * 8,
+        shape: Math.random() > 0.5 ? 'rect' : 'circle',
+      }));
+      let frame;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => {
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot * Math.PI / 180);
+          ctx.fillStyle = p.c;
+          if (p.shape === 'circle') {
+            ctx.beginPath();
+            ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.55);
+          }
+          ctx.restore();
+          p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.vy += 0.06;
+        });
+        if (pieces.some(p => p.y < canvas.height + 30)) {
+          frame = requestAnimationFrame(draw);
+        } else {
+          cancelAnimationFrame(frame); canvas.remove();
+        }
+      }
+      draw();
+      setTimeout(() => { cancelAnimationFrame(frame); if (canvas.parentNode) canvas.remove(); }, 7000);
+    }
+
     // ── CONFETTI ─────────────────────────────────────────────────────────────
     function fireConfetti() {
       const canvas = document.createElement('canvas');
@@ -1855,6 +2162,7 @@
     renderIdentityBar();
     loadAll();
     setInterval(loadAll, 30000);
+    setTimeout(handleDeepLink, 900); // run after first render completes
   </script>
 </body>
 </html>
